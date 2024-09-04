@@ -1,28 +1,91 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 
 const RoomBookingForm = () => {
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
+  const [bookingDays, setBookingDays] = useState("");
+  const roomId = uuid();
+  const { id } = useParams();
+  const [room, setRoom] = useState({});
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchRoom = async () => {
+      console.log(id);
+      try {
+        const response = await fetch(
+          `https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms/${id}`,
+        );
+        const data = await response.json();
+        setRoom(data);
+        console.log(data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchRoom();
+  }, [id]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // TODO: Implement booking logic here, such as saving to a database
-    console.log("Client Name:", clientName);
-    console.log("Client Phone:", clientPhone);
-    console.log("Booking Date:", bookingDate);
-    console.log("Booking Time:", bookingTime);
-
-    // Show success message to the user
-    alert("Room booked successfully!");
+    const bookingData = {
+      clientName,
+      clientPhone,
+      room: room.type,
+      price: room.price,
+      bookingDate,
+      bookingTime,
+      bookingDays,
+      roomId,
+    };
+    console.log(bookingData);
+    const response = await fetch(
+      "https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/bookings/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      },
+    );
+    if (response.ok) {
+      console.log("Booking created successfully");
+      const result = await fetch(
+        `https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            totalRooms: room.totalRooms - 1,
+          }),
+        },
+      );
+      if (result.ok) {
+        console.log("total rooms updated");
+        alert(`Room booked successfully!\n your order id is ${roomId}`);
+      } else {
+        throw new Error(
+          `Room update request failed with status: ${updateRoomResponse.status}`,
+        );
+      }
+    } else {
+      throw new Error(
+        `Booking request failed with status: ${bookingResponse.status}`,
+      );
+    }
 
     // Reset form fields after submission
     setClientName("");
     setClientPhone("");
     setBookingDate("");
     setBookingTime("");
+    setBookingDays("");
   };
 
   return (
@@ -75,6 +138,17 @@ const RoomBookingForm = () => {
               className="form-control"
               value={bookingTime}
               onChange={(e) => setBookingTime(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="bookingDays">No. of Days</label>
+            <input
+              type="number"
+              id="bookingDays"
+              className="form-control"
+              value={bookingDays}
+              onChange={(e) => setBookingDays(e.target.value)}
               required
             />
           </div>

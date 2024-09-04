@@ -11,7 +11,7 @@ const BookingScreen = () => {
         <Routes>
           <Route index path="/" element={<RoomInfoForm />} />
           <Route path="/room-booking" element={<Rooms/>} />
-          <Route path="/booking-form" element={<RoomBookingForm />} />
+          <Route path="/booking-form/:id" element={<RoomBookingForm />} />
         </Routes>
       </Router>
     </div>

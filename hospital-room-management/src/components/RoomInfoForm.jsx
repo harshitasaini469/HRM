@@ -30,13 +30,16 @@ const RoomInfoForm = () => {
       price: price,
       images: roomImages,
     };
-    await fetch("http://localhost:5000/api/rooms", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    await fetch(
+      "https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newRoom),
       },
-      body: JSON.stringify(newRoom),
-    })
+    )
       .then((result) => console.log(result.json()))
       .catch((err) => console.log(err));
 
