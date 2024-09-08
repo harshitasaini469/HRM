@@ -6,19 +6,18 @@ const RoomBookingForm = () => {
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [bookingDate, setBookingDate] = useState("");
-  const [bookingTime, setBookingTime] = useState("");
   const [bookingDays, setBookingDays] = useState("");
-  const roomId = uuid();
   const { id } = useParams();
+  const unique_id = uuid();
+  const bookedRoomId = unique_id.slice(0, 8);
+
   const [room, setRoom] = useState({});
 
   useEffect(() => {
     const fetchRoom = async () => {
       console.log(id);
       try {
-        const response = await fetch(
-          `https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms/${id}`,
-        );
+        const response = await fetch(`http://localhost:5000/api/rooms/${id}`);
         const data = await response.json();
         setRoom(data);
         console.log(data);
@@ -31,60 +30,54 @@ const RoomBookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const bookingData = {
       clientName,
       clientPhone,
       room: room.type,
+      roomTypeId: id,
       price: room.price,
       bookingDate,
-      bookingTime,
       bookingDays,
-      roomId,
+      roomId: `${room.type}${bookedRoomId}`,
     };
     console.log(bookingData);
-    const response = await fetch(
-      "https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/bookings/",
-      {
-        method: "POST",
+    const response = await fetch("http://localhost:5000/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bookingData),
+    });
+    if (response.ok) {
+      console.log("Booking created successfully");
+      const result = await fetch(`http://localhost:5000/api/rooms/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingData),
-      },
-    );
-    if (response.ok) {
-      console.log("Booking created successfully");
-      const result = await fetch(
-        `https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            totalRooms: room.totalRooms - 1,
-          }),
-        },
-      );
+        body: JSON.stringify({
+          totalRooms: room.totalRooms - 1,
+        }),
+      });
       if (result.ok) {
         console.log("total rooms updated");
-        alert(`Room booked successfully!\n your order id is ${roomId}`);
+        const data = await response.json();
+        console.log(data.roomId);
+        alert(`Room booked successfully!\n your order id is ${data.roomId}`);
       } else {
         throw new Error(
-          `Room update request failed with status: ${updateRoomResponse.status}`,
+          `Room update request failed with status: ${result.status}`
         );
       }
     } else {
-      throw new Error(
-        `Booking request failed with status: ${bookingResponse.status}`,
-      );
+      throw new Error(`Booking request failed with status: ${response.status}`);
     }
 
     // Reset form fields after submission
     setClientName("");
     setClientPhone("");
     setBookingDate("");
-    setBookingTime("");
     setBookingDays("");
   };
 
@@ -130,17 +123,7 @@ const RoomBookingForm = () => {
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="bookingTime">Booking Time:</label>
-            <input
-              type="time"
-              id="bookingTime"
-              className="form-control"
-              value={bookingTime}
-              onChange={(e) => setBookingTime(e.target.value)}
-              required
-            />
-          </div>
+         
           <div className="form-group">
             <label htmlFor="bookingDays">No. of Days</label>
             <input

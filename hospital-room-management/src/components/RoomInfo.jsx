@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 const RoomInfo = ({ id, image, type, totalRooms, price }) => {
   return (
     <div className="card mb-3 w-4/5 cursor-pointer">
@@ -9,13 +8,16 @@ const RoomInfo = ({ id, image, type, totalRooms, price }) => {
         <div className="col-md-8">
           <div className="card-body">
             <h5 className="card-title">{type} Room</h5>
-            <p className="card-text">Total Rooms: {totalRooms}</p>
             <p className="card-text">
+              <p className="card-text">Rooms Available: {totalRooms}</p>
               <small className="text-muted">Price per Night: Rs. {price}</small>
             </p>
-            <Link to={`/booking-form/${id}`}>
-              <button className="btn btn-primary">Book</button>
-            </Link>
+            <a
+              className={`btn btn-primary ${totalRooms == 0 ? "disabled" : ""}`}
+              href={totalRooms === 0 ? "#" : `/booking-form/${id}`}
+            >
+              {totalRooms >= 1 ? "Book" : "Not Avaiblabe"}{" "}
+            </a>
           </div>
         </div>
       </div>

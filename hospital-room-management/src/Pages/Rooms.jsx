@@ -1,18 +1,28 @@
 import RoomInfo from "../components/RoomInfo";
 import { useEffect, useState } from "react";
-import axios from "axios";
 const Rooms = () => {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
     console.log("calling");
     const fetchRooms = async () => {
-      const response = await axios.get(
-        "https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms/room-booking",
-      );
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/rooms/room-booking"
+        );
 
-      setRooms(response.data);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setRooms(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
     };
+
     fetchRooms();
   }, []);
   return (

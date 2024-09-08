@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const RoomInfoForm = () => {
   const [roomType, setRoomType] = useState("");
   const [roomImages, setRoomImages] = useState([]);
-  const [totalRooms, setTotalRooms] = useState("");
+  const [totalRooms, setTotalRooms] = useState(0);
   const [price, setPrice] = useState("");
 
   const handleImageChange = (e) => {
@@ -30,16 +30,13 @@ const RoomInfoForm = () => {
       price: price,
       images: roomImages,
     };
-    await fetch(
-      "https://eaeadc2b-f4e7-42d3-9738-75934f038dc6-00-1hkpz925mjm36.pike.replit.dev/api/rooms",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newRoom),
+    await fetch("http://localhost:5000/api/rooms", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+      body: JSON.stringify(newRoom),
+    })
       .then((result) => console.log(result.json()))
       .catch((err) => console.log(err));
 
@@ -53,8 +50,6 @@ const RoomInfoForm = () => {
     setTotalRooms("");
     setPrice("");
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div className="container mt-3">
@@ -134,6 +129,8 @@ const RoomInfoForm = () => {
             type="number"
             id="price"
             className="form-control"
+            min="1"
+            max="5000"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required
