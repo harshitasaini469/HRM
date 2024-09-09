@@ -31,7 +31,7 @@ const Rooms = () => {
         <RoomInfo
           key={index}
           id={room._id}
-          image={room.images[0]}
+          image={`http://localhost:5000${room.images[0]}`}
           type={room.type}
           totalRooms={room.totalRooms}
           price={room.price}

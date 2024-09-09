@@ -28,7 +28,7 @@ const BookingCancellationForm = () => {
       setRoom(null);
       return;
     }
-    try {
+    try {1
       const result = await fetch(
         `http://localhost:5000/api/bookings/${room.roomId}`,
         {
@@ -137,7 +137,11 @@ const BookingCancellationForm = () => {
                 type="date"
                 id="bookingDate"
                 className="form-control"
-                value={room?.bookingDate}
+                value={
+                  room?.bookingDate
+                    ? new Date(room.bookingDate).toISOString().split("T")[0]
+                    : ""
+                }
                 disabled
               />
             </div>

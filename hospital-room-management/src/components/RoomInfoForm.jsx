@@ -6,54 +6,68 @@ const RoomInfoForm = () => {
   const [totalRooms, setTotalRooms] = useState(0);
   const [price, setPrice] = useState("");
 
+  // Handle image selection
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
 
     if (roomImages.length + files.length > 5) {
-      alert("you can only add upto 5 images");
+      alert("You can only add up to 5 images.");
       return;
     }
-    const imagePreviews = files.map((file) => URL.createObjectURL(file));
-    setRoomImages((prevImages) => [...prevImages, ...imagePreviews]);
-    console.log(roomImages);
+
+    setRoomImages((prevImages) => [...prevImages, ...files]);
   };
 
+  // Remove image from selection
   const removeImage = (index) => {
-    const updateImages = roomImages.filter((_, i) => i !== index);
-    setRoomImages(updateImages);
+    const updatedImages = roomImages.filter((_, i) => i !== index);
+    setRoomImages(updatedImages);
   };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newRoom = {
-      type: roomType,
-      totalRooms: totalRooms,
-      price: price,
-      images: roomImages,
-    };
-    await fetch("http://localhost:5000/api/rooms", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newRoom),
-    })
-      .then((result) => console.log(result.json()))
-      .catch((err) => console.log(err));
 
-    console.log("room type", roomType);
-    console.log("room images", roomImages);
-    console.log("total rooms", totalRooms);
-    alert("Room details submitted");
+    // FormData to send images as files
+    const formData = new FormData();
+    formData.append("roomType", roomType);
+    formData.append("totalRooms", totalRooms);
+    formData.append("price", price);
 
-    setRoomType("");
-    setRoomImages([]);
-    setTotalRooms("");
-    setPrice("");
+    // Append images to FormData
+    roomImages.forEach((image) => {
+      formData.append("roomImages", image); // 'roomImages' should match field name in backend
+    });
+
+    try {
+      const response = await fetch("http://localhost:5000/api/rooms", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log(result);
+
+      alert("Room details submitted");
+
+      // Reset form fields after submission
+      setRoomType("");
+      setRoomImages([]);
+      setTotalRooms(0);
+      setRoomImages([])
+      setPrice("");
+    } catch (err) {
+      console.error("Error submitting form:", err);
+    }
   };
 
   return (
     <div className="container mt-3">
-      <form action="" onSubmit={handleSubmit} className="space-y-3">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-3"
+        encType="multipart/form-data"
+      >
         <div className="form-group">
           <label htmlFor="roomtype">Room Type:</label>
           <select
@@ -64,16 +78,20 @@ const RoomInfoForm = () => {
             onChange={(e) => setRoomType(e.target.value)}
             required
           >
-            <option value="" className="" disabled>
+            <option value="" disabled>
               Select Room Type
             </option>
             <option value="Single">Single</option>
-            <option value="Double">Double</option>
+            <option value="Double">Double Sharing</option>
             <option value="Suite">Suite</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="General ward">General Ward</option>
+            <option value="Standard">Standard</option>
           </select>
         </div>
+
         <div className="form-group">
-          <label htmlFor="roomImages">RoomImages (Max 5): </label>
+          <label htmlFor="roomImages">Room Images (Max 5): </label>
           <input
             type="file"
             id="roomImages"
@@ -85,17 +103,19 @@ const RoomInfoForm = () => {
             required
           />
         </div>
+
         <div className="form-group">
           <div className="row">
             {roomImages.map((image, index) => (
               <div key={index} className="col-md-4 col-sm-6 mb-3">
                 <div className="position-relative">
                   <img
-                    src={image}
+                    src={URL.createObjectURL(image)} // Convert file to a preview URL
                     alt={`Room preview ${index + 1}`}
                     className="img-fluid img-thumbnail h-full"
                   />
                   <button
+                    type="button"
                     className="btn btn-danger btn-sm position-absolute"
                     style={{ top: "10px", right: "10px" }}
                     onClick={() => removeImage(index)}
@@ -107,10 +127,9 @@ const RoomInfoForm = () => {
             ))}
           </div>
         </div>
+
         <div className="form-group">
-          <label htmlFor="totalRooms" className="">
-            Total Number of Rooms:
-          </label>
+          <label htmlFor="totalRooms">Total Number of Rooms:</label>
           <input
             type="number"
             id="totalRooms"
@@ -121,21 +140,21 @@ const RoomInfoForm = () => {
             required
           />
         </div>
+
         <div className="form-group">
-          <label htmlFor="price" className="">
-            Price Per Room :
-          </label>
+          <label htmlFor="price">Price Per Room:</label>
           <input
             type="number"
             id="price"
             className="form-control"
-            min="1"
+            min="500"
             max="5000"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required
           />
         </div>
+
         <button type="submit" className="btn btn-primary">
           Save
         </button>

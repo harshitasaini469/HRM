@@ -75,7 +75,7 @@ const BookedRooms = () => {
                 <th scope="row">{index + 1}</th>
                 <td>{room.clientName}</td>
                 <td>{room.clientPhone}</td>
-                <td>{room.roomType}</td>
+                <td>{room.room}</td>
                 <td>{room.price}</td>
                 <td>{new Date(room.bookingDate).toLocaleDateString()}</td>
                 <td>{room.bookingDays}</td>
@@ -84,7 +84,7 @@ const BookedRooms = () => {
           </tbody>
         </table>
       ) : (
-        <p>No Bookings found for the selected date</p>
+        <p className="mt-3 text-center text-lg">No Bookings found </p>
       )}
     </div>
   );
